@@ -26,6 +26,17 @@
 
     wpmWords: document.getElementById('wpmWords'),
     accChars: document.getElementById('accChars'),
+
+    // Results modal
+    resultsModal: document.getElementById('resultsModal'),
+    modalRestartBtn: document.getElementById('modalRestartBtn'),
+    resultsMeta: document.getElementById('resultsMeta'),
+    resWpmStd: document.getElementById('resWpmStd'),
+    resWpmWords: document.getElementById('resWpmWords'),
+    resAccWords: document.getElementById('resAccWords'),
+    resAccChars: document.getElementById('resAccChars'),
+    resCwWs: document.getElementById('resCwWs'),
+    resChars: document.getElementById('resChars'),
   };
 
   function setActive(btnOn, btnOff) {
@@ -37,10 +48,49 @@
 
   function nowMs() { return Date.now(); }
 
-  // --- App State (без россыпи глобальных переменных) ---
+  // Bootstrap modal instance (лениво создадим)
+  let resultsModalInstance = null;
+  function getResultsModalInstance() {
+    if (!el.resultsModal) return null;
+    if (!resultsModalInstance) {
+      // keyboard:true — Esc закрывает (можешь сделать false если хочешь)
+      resultsModalInstance = new bootstrap.Modal(el.resultsModal, { backdrop: 'static', keyboard: true });
+    }
+    return resultsModalInstance;
+  }
+
+  function showResultsModal(attempt) {
+    const m = getResultsModalInstance();
+    if (!m) return;
+
+    // Заполнить поля
+    const diffLabel = attempt.difficulty === 'pro' ? 'про' : 'база';
+    el.resultsMeta.textContent = `Режим: ${diffLabel} • Лимит: ${attempt.durationSec}s • ${new Date(attempt.date).toLocaleString()}`;
+
+    el.resWpmStd.textContent = String(attempt.wpmStd);
+    el.resWpmWords.textContent = String(attempt.wpmWords);
+    el.resAccWords.textContent = `${attempt.wordAccuracyPercent}%`;
+    el.resAccChars.textContent = `${attempt.charAccuracyPercent}%`;
+
+    m.show();
+
+    // Важно: уводим фокус в модалку, чтобы пробел не нажал restart под ней
+    // Bootstrap сам старается фокусировать модалку; дополнительно фокусируем кнопку "Повторить"
+    setTimeout(() => {
+      if (el.modalRestartBtn) el.modalRestartBtn.focus();
+    }, 0);
+  }
+
+  function hideResultsModalIfOpen() {
+    if (!resultsModalInstance) return;
+    // hide() безопасно вызывать даже если не показано, но на всякий случай:
+    resultsModalInstance.hide();
+  }
+
+  // --- App State ---
   const state = {
     durationSec: 30,
-    difficulty: 'beginner', // 'beginner' | 'pro'
+    difficulty: 'база', // 'база' | 'про'
 
     running: false,
     startedAt: null,
@@ -50,14 +100,12 @@
     words: [],
     index: 0,
 
-    // word-level
     wordsSubmitted: 0,
     wordsCorrect: 0,
 
-    // char-level / standard WPM
-    charsTyped: 0,              // считаем только подтверждённые слова: len(word)+1 (пробел)
-    correctCharPositions: 0,     // совпавшие позиции
-    totalCharPositions: 0        // maxLen по словам
+    charsTyped: 0,
+    correctCharPositions: 0,
+    totalCharPositions: 0
   };
 
   // --- Render helpers ---
@@ -70,7 +118,6 @@
     w.className = 'word';
     w.id = `w-${idx}`;
 
-    // каждый символ — отдельный span, чтобы красить по буквам
     for (let i = 0; i < word.length; i++) {
       const ch = document.createElement('span');
       ch.className = 'char';
@@ -103,16 +150,7 @@
     return document.getElementById(`w-${idx}`);
   }
 
-  function resetWordClasses(wordEl) {
-    wordEl.classList.remove('correct', 'wrong', 'current', 'over');
-    // сброс букв
-    wordEl.querySelectorAll('.char').forEach(ch => {
-      ch.classList.remove('correct', 'wrong');
-    });
-  }
-
   function markCurrentWord() {
-    // снять current со всех (дешёво, всего 40 слов)
     for (let i = 0; i < state.words.length; i++) {
       const w = getWordEl(i);
       if (!w) continue;
@@ -130,7 +168,6 @@
     const typed = el.input.value;
     const target = state.words[state.index] ?? '';
 
-    // overflow marker
     if (typed.length > target.length) current.classList.add('over');
     else current.classList.remove('over');
 
@@ -138,9 +175,7 @@
     for (let i = 0; i < chars.length; i++) {
       const ch = chars[i];
       ch.classList.remove('correct', 'wrong');
-
       if (i >= typed.length) continue;
-
       if (typed[i] === target[i]) ch.classList.add('correct');
       else ch.classList.add('wrong');
     }
@@ -163,19 +198,17 @@
 
   function startIfNeeded() {
     if (state.running) return;
+
     state.running = true;
     state.startedAt = nowMs();
     state.endsAt = state.startedAt + state.durationSec * 1000;
 
     setLimitsEnabled(false);
 
-    // тик чаще 1с, чтобы показ оставшихся секунд был стабильным
     state.tickId = setInterval(() => {
       const r = remainingSec();
       el.time.innerText = String(r);
-      if (r <= 0) {
-        endTest();
-      }
+      if (r <= 0) endTest();
     }, 200);
   }
 
@@ -195,7 +228,6 @@
     el.cwName.innerText = 'CW';
     el.cw.innerText = String(state.wordsCorrect);
 
-    // показываем промежуточные метрики, чтобы было интересно
     const std = TypingMetrics.standardWpm(state.charsTyped, state.durationSec);
     const wWpm = TypingMetrics.wordWpm(state.wordsCorrect, state.durationSec);
 
@@ -236,7 +268,6 @@
 
   // --- Submission logic ---
   function normalizeTyped(s) {
-    // Слово: убираем пробелы/переводы строк по краям
     return String(s ?? '').trim();
   }
 
@@ -253,33 +284,24 @@
     const current = getWordEl(state.index);
     if (!current) return;
 
-    // Обновить статистику
     state.wordsSubmitted++;
 
     const exact = typed === target;
     if (exact) state.wordsCorrect++;
 
-    // char metrics by positions
     const cmp = TypingMetrics.compareWordByPositions(typed, target);
     state.correctCharPositions += cmp.correct;
     state.totalCharPositions += cmp.total;
 
-    // standard WPM char count (учитываем пробел между словами)
-    // Берём длину typed (то, что реально набрали) + 1 пробел как разделитель.
     state.charsTyped += (typed.length + 1);
 
-    // оформить слово на экране
     current.classList.remove('current', 'over');
     current.classList.add(exact ? 'correct' : 'wrong');
 
-    // очистка ввода
     el.input.value = '';
-
-    // перейти к следующему слову / следующему набору
     state.index++;
 
     if (state.index >= state.words.length) {
-      // новый блок слов, но накопленная статистика сохраняется
       state.words = WordGenerator.randomWords({ difficulty: state.difficulty, count: 40 });
       state.index = 0;
       renderWords(state.words);
@@ -291,10 +313,9 @@
   }
 
   function endTest() {
-    // остановить таймер один раз
     if (!state.running) return;
 
-    // финально: если в поле что-то есть — отправим как последнее слово (это честнее, чем просто выкинуть)
+    // если пользователь что-то набрал — отправим как последнее слово
     if (normalizeTyped(el.input.value).length > 0) {
       submitCurrentWord({ allowEmpty: false });
     }
@@ -305,7 +326,6 @@
 
     displayFinalScore();
 
-    // Сохранение попытки (v2)
     const wordAcc = TypingMetrics.percent(state.wordsCorrect, state.wordsSubmitted);
     const charAcc = TypingMetrics.percent(state.correctCharPositions, state.totalCharPositions);
     const stdWpm = TypingMetrics.standardWpm(state.charsTyped, state.durationSec);
@@ -317,7 +337,6 @@
       durationSec: state.durationSec,
       difficulty: state.difficulty,
 
-      // metrics
       wpmStd: stdWpm,
       wpmWords: wWpm,
       wordAccuracyPercent: wordAcc,
@@ -333,12 +352,12 @@
 
     TypingStorage.saveAttempt(attempt);
 
-    // фокус на restart
-    el.restart.focus();
+    showResultsModal(attempt);
   }
 
   // --- Reset / init ---
   function resetStateAndUI() {
+    hideResultsModalIfOpen();
     stopTimer();
 
     state.wordsSubmitted = 0;
@@ -361,14 +380,10 @@
     setLimitsEnabled(true);
   }
 
-  // --- Event handlers (улучшения UX: paste/off, пробел/enter, backspace) ---
-  el.input.addEventListener('paste', (e) => {
-    // античит / стабильность метрик
-    e.preventDefault();
-  });
+  // --- Event handlers ---
+  el.input.addEventListener('paste', (e) => e.preventDefault());
 
   el.input.addEventListener('keydown', (e) => {
-    // запрет переносов строки
     if (e.key === 'Enter') {
       e.preventDefault();
       if (!state.running) startIfNeeded();
@@ -383,7 +398,6 @@
       return;
     }
 
-    // старт теста по первому "печатному" вводу (кроме модификаторов)
     const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
     if (isPrintable) startIfNeeded();
   });
@@ -391,9 +405,7 @@
   el.input.addEventListener('input', () => {
     if (!state.running && el.input.value.length > 0) startIfNeeded();
 
-    // если IME/мобилка вставила пробел в input — отправим слово
     if (/\s/.test(el.input.value)) {
-      // берём только до первого пробела как слово, остаток не поддерживаем в этой версии
       const parts = el.input.value.split(/\s+/);
       el.input.value = parts[0] ?? '';
       submitCurrentWord();
@@ -403,7 +415,6 @@
     updateLiveLetterHighlight();
   });
 
-  // limits
   el.thirty.addEventListener('click', () => {
     if (state.running) return;
     state.durationSec = 30;
@@ -420,19 +431,24 @@
 
   el.beg.addEventListener('click', () => {
     if (state.running) return;
-    state.difficulty = 'beginner';
+    state.difficulty = 'база';
     setActive(el.beg, el.pro);
     resetStateAndUI();
   });
 
   el.pro.addEventListener('click', () => {
     if (state.running) return;
-    state.difficulty = 'pro';
+    state.difficulty = 'про';
     setActive(el.pro, el.beg);
     resetStateAndUI();
   });
 
   el.restart.addEventListener('click', () => {
+    resetStateAndUI();
+  });
+
+  // Кнопка "Повторить" внутри модалки
+  el.modalRestartBtn?.addEventListener('click', () => {
     resetStateAndUI();
   });
 

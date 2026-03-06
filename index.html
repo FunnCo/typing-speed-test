@@ -60,14 +60,20 @@
         </div>
 
         <div class="stat-card">
+          <div id="wpmWordsName" class="stat-name yellow">WPM (слов)</div>
+          <div id="wpmWords" class="stat-value">0%</div>
+        </div>
+
+        <div class="stat-card">
           <div id="accName" class="stat-name yellow">Точность</div>
           <div id="acc" class="stat-value">0%</div>
         </div>
-      </div>
 
-      <div id="subMetrics" class="sub-metrics text-muted mt-2">
-        <span>WPM (слов): <b id="wpmWords" class="text-light">0</b></span>
-        <span>Точн. (симв): <b id="accChars" class="text-light">0%</b></span>
+        <div class="stat-card">
+          <div id="accCharsName" class="stat-name yellow">Точн. (симв)</div>
+          <div id="accChars" class="stat-value">0%</div>
+        </div>
+
       </div>
 
       <div class="text-display" id="textDisplay" aria-label="Текст для набора"></div>
@@ -116,6 +122,58 @@
         </div>
       </div>
     </div>
+
+    <!-- Модальное окно результатов -->
+<div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background:#2a2a2a; border-color:#52575d;">
+      <div class="modal-header">
+        <h5 class="modal-title yellow" id="resultsModalLabel">Результаты</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2 basic-text small" id="resultsMeta"></div>
+
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="p-2 rounded" style="border:1px solid #52575d;">
+              <div class="basic-text small">WPM (std)</div>
+              <div class="text-light h4 m-0" id="resWpmStd">0</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 rounded" style="border:1px solid #52575d;">
+              <div class="basic-text small">WPM (слов)</div>
+              <div class="text-light h4 m-0" id="resWpmWords">0</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 rounded" style="border:1px solid #52575d;">
+              <div class="basic-text small">Точность (слов)</div>
+              <div class="text-light h4 m-0" id="resAccWords">0%</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 rounded" style="border:1px solid #52575d;">
+              <div class="basic-text small">Точность (симв)</div>
+              <div class="text-light h4 m-0" id="resAccChars">0%</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="stats.html" class="btn btn-outline-warning btn-yellow">К статистике</a>
+        <button type="button" class="btn btn-outline-warning btn-yellow" id="modalRestartBtn">
+          Повторить
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <!-- Bootstrap 5 bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

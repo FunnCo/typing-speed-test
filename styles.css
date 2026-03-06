@@ -12,7 +12,7 @@ a{
   color: #52575d;
 }
 
-b, p{
+b, p, .basic-text{
   color: rgba(245, 245, 245, 1)
 }
 
@@ -79,7 +79,7 @@ li{
 /* --- Новый вид статистики на главной --- */
 .stats-grid{
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 

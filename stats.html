@@ -17,8 +17,8 @@
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h1 class="yellow h3 m-0">Статистика тренировок</h1>
         <div class="d-flex gap-2 flex-wrap">
-          <a href="index.html" class="btn btn-sm btn-outline-warning">Назад к тесту</a>
-          <a href="glossary.html" class="btn btn-sm btn-outline-warning">Справка</a>
+          <a href="index.html" class="btn btn-sm btn-outline-warning btn-yellow">Назад к тесту</a>
+          <a href="glossary.html" class="btn btn-sm btn-outline-warning btn-yellow">Справка</a>
           <button id="clearStatsBtn" class="btn btn-sm btn-outline-danger">Очистить статистику</button>
         </div>
       </div>
@@ -31,8 +31,8 @@
               <label class="form-label text-light">Сложность</label>
               <select id="filterDifficulty" class="form-select form-select-sm dark-select">
                 <option value="all" selected>Все</option>
-                <option value="beginner">beginner (база)</option>
-                <option value="pro">pro (про)</option>
+                <option value="beginner">база</option>
+                <option value="pro">про</option>
               </select>
             </div>
             <div class="col-12 col-md-4">
@@ -48,7 +48,7 @@
                 <input class="form-check-input" type="checkbox" id="toggleMA" checked>
                 <label class="form-check-label text-light" for="toggleMA">Сглаживание (MA)</label>
               </div>
-              <button id="resetFiltersBtn" class="btn btn-sm btn-outline-warning ms-auto">Сбросить</button>
+              <button id="resetFiltersBtn" class="btn btn-sm btn-outline-warning ms-auto btn-yellow">Сбросить</button>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@
         <div class="card-body">
           <h5 class="card-title yellow">График динамики</h5>
           <canvas id="statsChart" height="120"></canvas>
-          <small class="text-muted d-block mt-2">
+          <small class="text-muted d-block mt-2 basic-text">
             Показаны WPM (std), точность по словам и точность по символам по мере выполнения попыток (с учётом фильтров).
           </small>
         </div>
