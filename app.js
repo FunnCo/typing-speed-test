@@ -1,376 +1,441 @@
-const testItem = document.getElementById("textDisplay");
-const inputItem = document.getElementById("textInput");
-const timeName = document.getElementById("timeName");
-const time = document.getElementById("time");
-const cwName = document.getElementById("cwName");
-const cw = document.getElementById("cw");
-const restartBtn = document.getElementById("restartBtn");
-const thirty = document.getElementById("thirty");
-const sixty = document.getElementById("sixty");
-const beg = document.getElementById("beg");
-const pro = document.getElementById("pro");
+(function () {
+  'use strict';
 
-var wordNo = 1;
-var wordsSubmitted = 0;
-var wordsCorrect = 0;
-var timer = 30;
-var flag=0;
-var factor=2;
-var seconds;
-var difficulty=1;
+  // --- DOM ---
+  const el = {
+    test: document.getElementById('textDisplay'),
+    input: document.getElementById('textInput'),
+    restart: document.getElementById('restartBtn'),
 
-displayTest(difficulty);
+    thirty: document.getElementById('thirty'),
+    sixty: document.getElementById('sixty'),
+    beg: document.getElementById('beg'),
+    pro: document.getElementById('pro'),
 
-//on Input
-inputItem.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') {
-    event.preventDefault(); // чтобы не добавлялся перевод строки
-    checkWord();
+    timeName: document.getElementById('timeName'),
+    time: document.getElementById('time'),
+
+    cwName: document.getElementById('cwName'),
+    cw: document.getElementById('cw'),
+
+    wpmName: document.getElementById('wpmName'),
+    wpm: document.getElementById('wpm'),
+
+    accName: document.getElementById('accName'),
+    acc: document.getElementById('acc'),
+
+    wpmWords: document.getElementById('wpmWords'),
+    accChars: document.getElementById('accChars'),
+  };
+
+  function setActive(btnOn, btnOff) {
+    btnOn.classList.add('active');
+    btnOn.setAttribute('aria-pressed', 'true');
+    btnOff.classList.remove('active');
+    btnOff.setAttribute('aria-pressed', 'false');
   }
-});
 
-inputItem.addEventListener('input', function(event){
-  if(flag===0){
-    flag=1;
-    timeStart();
+  function nowMs() { return Date.now(); }
+
+  // --- App State (без россыпи глобальных переменных) ---
+  const state = {
+    durationSec: 30,
+    difficulty: 'beginner', // 'beginner' | 'pro'
+
+    running: false,
+    startedAt: null,
+    endsAt: null,
+    tickId: null,
+
+    words: [],
+    index: 0,
+
+    // word-level
+    wordsSubmitted: 0,
+    wordsCorrect: 0,
+
+    // char-level / standard WPM
+    charsTyped: 0,              // считаем только подтверждённые слова: len(word)+1 (пробел)
+    correctCharPositions: 0,     // совпавшие позиции
+    totalCharPositions: 0        // maxLen по словам
+  };
+
+  // --- Render helpers ---
+  function clearTest() {
+    el.test.innerHTML = '';
   }
-  var charEntered = event.data;
-  if(/\s/g.test(charEntered)){  //check if the character entered is a whitespace
-    checkWord();
-  }
-  else{
-    currentWord();
-  }
-});
 
-//time selection
-thirty.addEventListener("click",function(){
-  timer = 30;
-  factor = 2;
-  limitColor(thirty,sixty);
-  time.innerText = timer;
-});
-sixty.addEventListener("click",function(){
-  timer = 60;
-  factor = 1;
-  limitColor(sixty, thirty);
-  time.innerText = timer;
-});
+  function createWordNode(word, idx) {
+    const w = document.createElement('span');
+    w.className = 'word';
+    w.id = `w-${idx}`;
 
-//difficulty Selection
-beg.addEventListener("click",function(){
-  difficulty = 1;
-  displayTest(difficulty);
-  limitColor(beg,pro);
-});
-pro.addEventListener("click",function(){
-  difficulty = 2;
-  displayTest(difficulty);
-  limitColor(pro,beg);
-});
-
-//set the color of time and difficulty
-function limitColor(itema,itemr ){
-  // Визуально выделяем активный селектор
-  itema.classList.add('active');
-  itema.setAttribute('aria-pressed','true');
-
-  itemr.classList.remove('active');
-  itemr.setAttribute('aria-pressed','false');
-}
-
-//restart the Test
-restartBtn.addEventListener("click",function(){
-
-  wordsSubmitted = 0;
-  wordsCorrect = 0;
-  flag=0;
-
-  time.classList.remove("current");
-  cw.classList.remove("current");
-  time.innerText = timer;
-  timeName.innerText = "Time";
-  cw.innerText = wordsCorrect;
-  cwName.innerText = "CW";
-  inputItem.disabled = false;
-  inputItem.value = '';
-  inputItem.focus();
-
-  displayTest(difficulty);
-  clearInterval(seconds);
-  limitVisible();
-});
-
-//start the timer countdown
-function timeStart(){
-  limitInvisible();
-  seconds = setInterval(function() {
-    time.innerText--;
-    if (time.innerText == "-1") {
-        timeOver();
-        clearInterval(seconds);
+    // каждый символ — отдельный span, чтобы красить по буквам
+    for (let i = 0; i < word.length; i++) {
+      const ch = document.createElement('span');
+      ch.className = 'char';
+      ch.textContent = word[i];
+      ch.dataset.pos = String(i);
+      w.appendChild(ch);
     }
-  }, 1000);
-}
-
-//set Limit visibility
-function limitVisible(){
-  thirty.style.visibility = 'visible';
-  sixty.style.visibility = 'visible';
-  beg.style.visibility = 'visible';
-  pro.style.visibility = 'visible';
-}
-function limitInvisible(){
-  thirty.style.visibility = 'hidden';
-  sixty.style.visibility = 'hidden';
-  beg.style.visibility = 'hidden';
-  pro.style.visibility = 'hidden';
-}
-
-//display the score
-function displayScore(){
-  let percentageAcc = 0;
-  if(wordsSubmitted!==0){
-    percentageAcc = Math.floor((wordsCorrect/wordsSubmitted)*100);
+    return w;
   }
 
-  time.classList.add("current");
-  cw.classList.add("current");
+  function renderWords(words) {
+    clearTest();
+    const frag = document.createDocumentFragment();
 
-  time.innerText = percentageAcc+"%";
-  timeName.innerText = "PA";
+    words.forEach((word, idx) => {
+      const w = createWordNode(word, idx);
+      frag.appendChild(w);
 
-  cw.innerText = factor*wordsCorrect;
-  cwName.innerText = "WPM";
-}
+      const space = document.createElement('span');
+      space.className = 'space';
+      space.textContent = ' ';
+      frag.appendChild(space);
+    });
 
-//check if the user is entering correcrt word
-function currentWord(){
-  const wordEntered = inputItem.value;
-  const currentID = "word "+wordNo;
-  const currentSpan = document.getElementById(currentID);
-  const curSpanWord = currentSpan.innerText;
-
-  if(wordEntered == curSpanWord.substring(0,wordEntered.length)){
-    colorSpan(currentID, 2);
-  }
-  else{
-    colorSpan(currentID, 3);
+    el.test.appendChild(frag);
+    markCurrentWord();
   }
 
-}
-//checks word entered
-function checkWord(){
-  const wordEntered = inputItem.value;
-  inputItem.value='';
-
-  const wordID = "word "+wordNo;
-  const checkSpan = document.getElementById(wordID);
-  wordNo++;
-  wordsSubmitted++;
-  console.log(wordEntered.trim() + " vs " + checkSpan.innerText.trim());
-  if(checkSpan.innerText.trim() === wordEntered.trim()){
-    colorSpan(wordID, 1);
-    wordsCorrect++;
-    cw.innerText=wordsCorrect;
-  }
-  else{
-    colorSpan(wordID, 3);
+  function getWordEl(idx) {
+    return document.getElementById(`w-${idx}`);
   }
 
-  if(wordNo>40){
+  function resetWordClasses(wordEl) {
+    wordEl.classList.remove('correct', 'wrong', 'current', 'over');
+    // сброс букв
+    wordEl.querySelectorAll('.char').forEach(ch => {
+      ch.classList.remove('correct', 'wrong');
+    });
+  }
 
-    displayTest(difficulty);
+  function markCurrentWord() {
+    // снять current со всех (дешёво, всего 40 слов)
+    for (let i = 0; i < state.words.length; i++) {
+      const w = getWordEl(i);
+      if (!w) continue;
+      w.classList.remove('current');
+      w.classList.remove('over');
+    }
+    const current = getWordEl(state.index);
+    if (current) current.classList.add('current');
   }
-  else{
-    const nextID = "word "+wordNo;
-    colorSpan(nextID, 2);
-  }
-}
 
-//color the words
-function colorSpan(id, color){
-  const span = document.getElementById(id);
-  if(color === 1 ){
-    span.classList.remove('wrong');
-    span.classList.remove('current');
-    span.classList.add('correct');
-  }
-  else if(color ===2){
-    span.classList.remove('correct');
-    span.classList.remove('wrong');
-    span.classList.add('current');
-  }
-  else{
-    span.classList.remove('correct');
-    span.classList.remove('current');
-    span.classList.add('wrong');
-  }
-}
+  function updateLiveLetterHighlight() {
+    const current = getWordEl(state.index);
+    if (!current) return;
 
-//display the random words on screen
-function displayTest(diff){
-  wordNo = 1;
-  testItem.innerHTML = '';
+    const typed = el.input.value;
+    const target = state.words[state.index] ?? '';
 
-  let newTest = randomWords(diff);
-  newTest.forEach(function(word, i){
-    let wordSpan = document.createElement('span');
-    wordSpan.innerText = word;
-    wordSpan.setAttribute("id", "word " + (i+1));
-    testItem.appendChild(wordSpan);
+    // overflow marker
+    if (typed.length > target.length) current.classList.add('over');
+    else current.classList.remove('over');
+
+    const chars = current.querySelectorAll('.char');
+    for (let i = 0; i < chars.length; i++) {
+      const ch = chars[i];
+      ch.classList.remove('correct', 'wrong');
+
+      if (i >= typed.length) continue;
+
+      if (typed[i] === target[i]) ch.classList.add('correct');
+      else ch.classList.add('wrong');
+    }
+  }
+
+  // --- Timer ---
+  function remainingSec() {
+    if (!state.running || !state.endsAt) return state.durationSec;
+    const ms = state.endsAt - nowMs();
+    return Math.max(0, Math.ceil(ms / 1000));
+  }
+
+  function setLimitsEnabled(enabled) {
+    const v = enabled ? 'visible' : 'hidden';
+    el.thirty.style.visibility = v;
+    el.sixty.style.visibility = v;
+    el.beg.style.visibility = v;
+    el.pro.style.visibility = v;
+  }
+
+  function startIfNeeded() {
+    if (state.running) return;
+    state.running = true;
+    state.startedAt = nowMs();
+    state.endsAt = state.startedAt + state.durationSec * 1000;
+
+    setLimitsEnabled(false);
+
+    // тик чаще 1с, чтобы показ оставшихся секунд был стабильным
+    state.tickId = setInterval(() => {
+      const r = remainingSec();
+      el.time.innerText = String(r);
+      if (r <= 0) {
+        endTest();
+      }
+    }, 200);
+  }
+
+  function stopTimer() {
+    if (state.tickId) clearInterval(state.tickId);
+    state.tickId = null;
+    state.running = false;
+    state.startedAt = null;
+    state.endsAt = null;
+  }
+
+  // --- Metrics/UI updates ---
+  function updateStatsUIRunning() {
+    el.timeName.innerText = 'Время';
+    el.time.innerText = String(state.running ? remainingSec() : state.durationSec);
+
+    el.cwName.innerText = 'CW';
+    el.cw.innerText = String(state.wordsCorrect);
+
+    // показываем промежуточные метрики, чтобы было интересно
+    const std = TypingMetrics.standardWpm(state.charsTyped, state.durationSec);
+    const wWpm = TypingMetrics.wordWpm(state.wordsCorrect, state.durationSec);
+
+    el.wpmName.innerText = 'WPM (std)';
+    el.wpm.innerText = String(std);
+
+    const wordAcc = TypingMetrics.percent(state.wordsCorrect, state.wordsSubmitted);
+    el.accName.innerText = 'Точность (слов)';
+    el.acc.innerText = `${wordAcc}%`;
+
+    const charAcc = TypingMetrics.percent(state.correctCharPositions, state.totalCharPositions);
+    el.wpmWords.innerText = String(wWpm);
+    el.accChars.innerText = `${charAcc}%`;
+  }
+
+  function displayFinalScore() {
+    const wordAcc = TypingMetrics.percent(state.wordsCorrect, state.wordsSubmitted);
+    const charAcc = TypingMetrics.percent(state.correctCharPositions, state.totalCharPositions);
+
+    const stdWpm = TypingMetrics.standardWpm(state.charsTyped, state.durationSec);
+    const wWpm = TypingMetrics.wordWpm(state.wordsCorrect, state.durationSec);
+
+    el.timeName.innerText = 'Готово';
+    el.time.innerText = '0';
+
+    el.cwName.innerText = 'CW/WS';
+    el.cw.innerText = `${state.wordsCorrect}/${state.wordsSubmitted}`;
+
+    el.wpmName.innerText = 'WPM (std)';
+    el.wpm.innerText = String(stdWpm);
+
+    el.accName.innerText = 'Точн. (слов)';
+    el.acc.innerText = `${wordAcc}%`;
+
+    el.wpmWords.innerText = String(wWpm);
+    el.accChars.innerText = `${charAcc}%`;
+  }
+
+  // --- Submission logic ---
+  function normalizeTyped(s) {
+    // Слово: убираем пробелы/переводы строк по краям
+    return String(s ?? '').trim();
+  }
+
+  function submitCurrentWord({ allowEmpty = false } = {}) {
+    const typedRaw = el.input.value;
+    const typed = normalizeTyped(typedRaw);
+    if (!typed && !allowEmpty) {
+      el.input.value = '';
+      updateLiveLetterHighlight();
+      return;
+    }
+
+    const target = state.words[state.index] ?? '';
+    const current = getWordEl(state.index);
+    if (!current) return;
+
+    // Обновить статистику
+    state.wordsSubmitted++;
+
+    const exact = typed === target;
+    if (exact) state.wordsCorrect++;
+
+    // char metrics by positions
+    const cmp = TypingMetrics.compareWordByPositions(typed, target);
+    state.correctCharPositions += cmp.correct;
+    state.totalCharPositions += cmp.total;
+
+    // standard WPM char count (учитываем пробел между словами)
+    // Берём длину typed (то, что реально набрали) + 1 пробел как разделитель.
+    state.charsTyped += (typed.length + 1);
+
+    // оформить слово на экране
+    current.classList.remove('current', 'over');
+    current.classList.add(exact ? 'correct' : 'wrong');
+
+    // очистка ввода
+    el.input.value = '';
+
+    // перейти к следующему слову / следующему набору
+    state.index++;
+
+    if (state.index >= state.words.length) {
+      // новый блок слов, но накопленная статистика сохраняется
+      state.words = WordGenerator.randomWords({ difficulty: state.difficulty, count: 40 });
+      state.index = 0;
+      renderWords(state.words);
+    } else {
+      markCurrentWord();
+    }
+
+    updateStatsUIRunning();
+  }
+
+  function endTest() {
+    // остановить таймер один раз
+    if (!state.running) return;
+
+    // финально: если в поле что-то есть — отправим как последнее слово (это честнее, чем просто выкинуть)
+    if (normalizeTyped(el.input.value).length > 0) {
+      submitCurrentWord({ allowEmpty: false });
+    }
+
+    stopTimer();
+    el.input.disabled = true;
+    setLimitsEnabled(true);
+
+    displayFinalScore();
+
+    // Сохранение попытки (v2)
+    const wordAcc = TypingMetrics.percent(state.wordsCorrect, state.wordsSubmitted);
+    const charAcc = TypingMetrics.percent(state.correctCharPositions, state.totalCharPositions);
+    const stdWpm = TypingMetrics.standardWpm(state.charsTyped, state.durationSec);
+    const wWpm = TypingMetrics.wordWpm(state.wordsCorrect, state.durationSec);
+
+    const attempt = {
+      version: 2,
+      date: new Date().toISOString(),
+      durationSec: state.durationSec,
+      difficulty: state.difficulty,
+
+      // metrics
+      wpmStd: stdWpm,
+      wpmWords: wWpm,
+      wordAccuracyPercent: wordAcc,
+      charAccuracyPercent: charAcc,
+
+      wordsCorrect: state.wordsCorrect,
+      wordsSubmitted: state.wordsSubmitted,
+
+      charsTyped: state.charsTyped,
+      correctCharPositions: state.correctCharPositions,
+      totalCharPositions: state.totalCharPositions
+    };
+
+    TypingStorage.saveAttempt(attempt);
+
+    // фокус на restart
+    el.restart.focus();
+  }
+
+  // --- Reset / init ---
+  function resetStateAndUI() {
+    stopTimer();
+
+    state.wordsSubmitted = 0;
+    state.wordsCorrect = 0;
+    state.charsTyped = 0;
+    state.correctCharPositions = 0;
+    state.totalCharPositions = 0;
+
+    state.index = 0;
+    state.words = WordGenerator.randomWords({ difficulty: state.difficulty, count: 40 });
+
+    el.input.disabled = false;
+    el.input.value = '';
+    el.input.focus();
+
+    el.time.innerText = String(state.durationSec);
+
+    renderWords(state.words);
+    updateStatsUIRunning();
+    setLimitsEnabled(true);
+  }
+
+  // --- Event handlers (улучшения UX: paste/off, пробел/enter, backspace) ---
+  el.input.addEventListener('paste', (e) => {
+    // античит / стабильность метрик
+    e.preventDefault();
   });
 
-  const nextID = "word "+wordNo;
-  colorSpan(nextID, 2);
-}
+  el.input.addEventListener('keydown', (e) => {
+    // запрет переносов строки
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!state.running) startIfNeeded();
+      submitCurrentWord();
+      return;
+    }
 
-//Generate an array of random 50 words
-function randomWords(diff){
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (!state.running) startIfNeeded();
+      submitCurrentWord();
+      return;
+    }
 
-var topWords = [
-  "превосходительство","благоразумие","здравоохранение","достопримечательность","соответствующий",
-  "предпринимательство","ответственность","непреодолимый","противоречивый","электрификация",
-  "демилитаризация","неудовлетворительный","конституционность","взаимозаменяемость","инфраструктура",
-  "интеллектуальный","исключительность","совершенствование","непредсказуемость","чрезвычайный",
-  "конкурентоспособность","взаимодействие","многообразие","неправомерный","обстоятельство",
-  "предрасположенность","представительство","машиностроение","сельскохозяйственный","восстановление",
-  "автоматизация","экспериментальный","высококвалифицированный","неотвратимость","электронный",
-  "дезинформация","компетентность","непогрешимость","противодействие","многофункциональный",
-  "беспрецедентный","непрерывность","взаимоисключающий","искусствоведение","многозадачность",
-  "квалификация","преобразование","переосмысление","параллелепипед","индивидуальность",
-  "распространённость","соискатели","правоохранительный","высокоэффективный","неприемлемый",
-  "правомерность","сопоставимость","взаимосвязанный","добросовестность","противозаконный",
-  "рационализатор","метаморфоза","импортозамещение","электроэнергетика","сверхпроводимость",
-  "космополитизм","фундаментальность","неподконтрольный","многоступенчатый","многоугольник",
-  "непричастность","бессистемность","международный","первоисточник","гуманитарный",
-  "совместительство","приоритетность","деятельность","согласованность","внутренний",
-  "исповедальность","неприкасаемый","противоестественный","бесконечность","противоударный",
-  "сверхъестественный","безотлагательный","несоизмеримый","сельскохозяйство","неподготовленный",
-  "непредусмотренный","диспропорция","гиперответственность","сверхаккуратный","персонализированный",
-  "переоборудование","высокотехнологичный","шестидесятичетырёхбитный","многонациональный",
-  "психоэмоциональный","электромагнитный","социокультурный","парообразование",
-  "предположительный","неосуществимый","безвозмездный","миропонимание","неинформированность",
-  "всеобъемлющий","неопровержимый","добровольческий","жизнеобеспечение","великодушие",
-  "высокомерие","неподражаемый","небезызвестный","неоднозначность","переоценивание",
-  "преступность","опосредованность","сверхважный","конфиденциальность","противоречие",
-  "совместимость","невообразимый","многоуровневый","переустановка","миросозерцание",
-  "противоречивость","сверхскоростной","безошибочность","межведомственный","импровизация",
-  "переизбыток","злоупотребление","многословность","неодушевлённый","сверхмощный",
-  "переукомплектование","взаимовыручка","сверхважность","непримиримость","старомодность",
-  "переоснащение","многоцелевой","сверхзащищённый","неосмотрительность","превосходство",
-  "сверхплотность","объективность","съёмка","подъезд","разъярённый","объём","предъявление",
-  "въедливый","объект","изъян","трёхмерный","вьюга","пьеса","всёохватывающий","предубеждение",
-  "расшифровка","сверхъяркий","синхронизация","переориентация","противоизносный","осуществимость",
-  "переоценка","распознавание","непреложный","преимущество","преобладание","злоумышленник",
-  "целеустремлённость","взаимозависимость","несовместимый","противодействующий","многократность",
-  "совершеннолетие","вдохновляющий","рентабельность","непосредственность","неподтверждённый",
-  "многофакторный","артериосклероз","термоэлектрический","кровообращение","миротворчество"
-];
+    // старт теста по первому "печатному" вводу (кроме модификаторов)
+    const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
+    if (isPrintable) startIfNeeded();
+  });
 
-var basicWords = [
-  "я","ты","он","она","мы","вы","они","да","нет","и","а","но","что","как","где","когда","почему","зачем","кто",
-  "это","там","тут","всё","не","быть","есть","мой","твой","его","её","наш","ваш","их",
-  "человек","дом","кот","собака","мяч","стол","стул","книга","ручка","окно","дверь","город","мир","улица",
-  "друг","семья","мама","папа","сын","дочь","брат","сестра","школа","работа","учёба","вода","чай","кофе",
-  "еда","хлеб","соль","сахар","молоко","сыр","мясо","рыба","суп","яблоко","банан","сок",
-  "день","ночь","утро","вечер","сегодня","вчера","завтра","час","минута","год","месяц","неделя",
-  "раз","два","три","четыре","пять","шесть","семь","восемь","девять","десять",
-  "маленький","большой","длинный","короткий","высокий","низкий","широкий","узкий",
-  "хороший","плохой","новый","старый","чистый","грязный","тёплый","холодный","сильный","слабый",
-  "быстрый","медленный","лёгкий","тяжёлый","добрый","злой","весёлый","грустный","тихий","громкий",
-  "близко","далеко","вверх","вниз","лево","право","вперёд","назад","рядом","внутри","снаружи",
-  "идти","бежать","ехать","лететь","плыть","стоять","сидеть","лежать","вставать","падать",
-  "брать","давать","нести","держать","открывать","закрывать","ждать","смотреть","видеть","слышать",
-  "говорить","слушать","читать","писать","думать","знать","понимать","помнить","спрашивать","отвечать",
-  "любить","хотеть","мочь","нужно","делать","играть","учить","учиться","помогать","работать","жить",
-  "покупать","продавать","платить","бесплатно","дорого","дешево","магазин","рынок","деньги","цена",
-  "машина","поезд","автобус","трамвай","метро","самолёт","такси","станция","дорога","путь",
-  "лес","поле","гора","река","море","озеро","небо","солнце","луна","звезда","ветер","дождь","снег",
-  "огонь","дым","пепел","камень","песок","земля","трава","цветок","дерево","лист",
-  "тело","рука","нога","голова","лицо","глаз","нос","рот","ухо","волосы","палец","колено","спина",
-  "домой","вместе","один","двое","трое","много","мало","ещё","ужe","всегда","иногда","часто","редко",
-  "сейчас","потом","раньше","сначала","позже","быстро","медленно","сильно","слабо","точно","примерно",
-  "правда","ложь","давай","пожалуйста","спасибо","извини","простите","привет","пока",
-  "вверх","вниз","сюда","туда","отсюда","оттуда","надо","можно","нельзя",
-  "квартира","комната","кухня","ванна","коридор","балкон","пол","потолок","стена","лампа","свет",
-  "телефон","компьютер","часы","телевизор","радио","клавиатура","мышь","экран","звук","кнопка",
-  "бумага","тетрадь","карандаш","линейка","ластик","сумка","портфель","папка",
-  "одежда","куртка","пальто","рубашка","футболка","брюки","платье","юбка","носки","ботинки","кроссовки",
-  "шапка","шарф","перчатки","зонт",
-  "север","юг","восток","запад","Россия","мирный","место","время","путь","сила","мысль","идея",
-  "право","лево","центр","край","часть","целое","начало","конец",
-  "ранний","поздний","утренний","вечерний","дневной","ночной",
-  "сосед","учитель","ученик","врач","пациент","повар","водитель","продавец","покупатель",
-  "игра","фильм","музыка","песня","книга","история","картина","фото","новость","газета","журнал",
-  "сайт","страница","письмо","сообщение","вопрос","ответ","задача","пример","правило",
-  "страх","радость","горе","надежда","мечта","цель","план","правда","вера","любовь","дружба"
-];
+  el.input.addEventListener('input', () => {
+    if (!state.running && el.input.value.length > 0) startIfNeeded();
 
-  if(diff==1){
-    wordArray = basicWords;
-  }
-  else{
-    wordArray =topWords;
-  }
+    // если IME/мобилка вставила пробел в input — отправим слово
+    if (/\s/.test(el.input.value)) {
+      // берём только до первого пробела как слово, остаток не поддерживаем в этой версии
+      const parts = el.input.value.split(/\s+/);
+      el.input.value = parts[0] ?? '';
+      submitCurrentWord();
+      return;
+    }
 
-  var selectedWords = [];
-  for(var i=0;i<40;i++){
-    var randomNumber = Math.floor(Math.random()*wordArray.length);
-    selectedWords.push(wordArray[randomNumber]+" ");
-  }
-  return selectedWords;
-}
+    updateLiveLetterHighlight();
+  });
 
-// === Сохранение статистики попыток в localStorage ===
+  // limits
+  el.thirty.addEventListener('click', () => {
+    if (state.running) return;
+    state.durationSec = 30;
+    setActive(el.thirty, el.sixty);
+    resetStateAndUI();
+  });
 
-// Получение массива попыток
-function getTypingStats() {
-  const key = 'typingStats';
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.error('Ошибка чтения статистики:', e);
-    return [];
-  }
-}
+  el.sixty.addEventListener('click', () => {
+    if (state.running) return;
+    state.durationSec = 60;
+    setActive(el.sixty, el.thirty);
+    resetStateAndUI();
+  });
 
-// Сохранение одной попытки
-function saveAttempt(attempt) {
-  const key = 'typingStats';
-  const stats = getTypingStats();
-  stats.push(attempt);
-  try {
-    localStorage.setItem(key, JSON.stringify(stats));
-  } catch (e) {
-    console.error('Ошибка записи статистики:', e);
-  }
-}
+  el.beg.addEventListener('click', () => {
+    if (state.running) return;
+    state.difficulty = 'beginner';
+    setActive(el.beg, el.pro);
+    resetStateAndUI();
+  });
 
-// Помощники для сохранения текущей попытки
-function currentDifficultyLabel() {
-  return difficulty === 1 ? 'beginner' : 'pro';
-}
+  el.pro.addEventListener('click', () => {
+    if (state.running) return;
+    state.difficulty = 'pro';
+    setActive(el.pro, el.beg);
+    resetStateAndUI();
+  });
 
+  el.restart.addEventListener('click', () => {
+    resetStateAndUI();
+  });
 
-function timeOver(){
-  inputItem.disabled = true;
-  restartBtn.focus();
-
-  displayScore();
-  const percentageAcc = (wordsSubmitted !== 0) ? Math.floor((wordsCorrect / wordsSubmitted) * 100) : 0;
-  const attempt = {
-    date: new Date().toISOString(),
-    durationSec: timer,
-    difficulty: currentDifficultyLabel(),
-    wpm: factor * wordsCorrect, 
-    accuracyPercent: percentageAcc,
-    wordsCorrect,
-    wordsSubmitted
-  };
-  saveAttempt(attempt);
-}
-
+  // init
+  resetStateAndUI();
+})();

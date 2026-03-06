@@ -20,36 +20,15 @@ li{
   color: rgba(245, 245, 245, 0.9)
 }
 
-.yellow{
-  color: #ffd369;
-}
-.correct{
-  color: #29bb89;
-}
-.wrong{
-  color: #e84545;
-  text-decoration: underline;
-}
-.current{
-  color: #eeeeee;
-}
-.center{
-  text-align: center;
-}
-.if{
-  display: inline-flex;
-}
+.yellow{ color: #ffd369; }
+.correct{ color: #29bb89; }
+.wrong{ color: #e84545; text-decoration: underline; }
+.current{ color: #eeeeee; }
+.center{ text-align: center; }
 
 .box {
   max-width: 900px;
   padding: 0 30px;
-}
-
-#heading{
-  align-self: left;
-  font-size: 1.75rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
 }
 
 /* --- Селекторы времени и режима --- */
@@ -72,12 +51,12 @@ li{
   border: 1px solid #52575d;
   color: #eeeeee;
   padding: 4px 12px;
-  border-radius: 999px; /* пилюля */
+  border-radius: 999px;
   font-size: 0.9rem;
   line-height: 1.2;
   cursor: pointer;
   transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
-  text-decoration: none; /* без подчёркивания */
+  text-decoration: none;
 }
 
 .mode-btn:hover{
@@ -97,41 +76,102 @@ li{
   font-weight: 600;
 }
 
-.stats{
-  margin: 10px auto 20px auto;
+/* --- Новый вид статистики на главной --- */
+.stats-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.details{
-  font-size: 6rem;
-}
-.stat-block{
-  padding: 0 30px;
-  min-width: 250px;
+@media(max-width: 900px){
+  .stats-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-@media(max-width: 600px){
-  .details{
-    font-size: 5rem;
-  }
-  .stat-block{
-    min-width: 0;
-  }
+.stat-card{
+  background: #1f1f1f;
+  border: 1px solid #52575d;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: center;
 }
 
 .stat-name{
-  font-size: 1rem;
-  position: relative;
-  top: 45px;
-  right: 5px;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
 }
 
+.stat-value{
+  font-size: 2.6rem;
+  line-height: 1;
+  color: #eeeeee;
+}
+
+.sub-metrics{
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+/* --- Текст и подсветка --- */
 .text-display{
-  margin: 0 0 22px 0;
+  margin: 14px 0 18px 0;
   font-size: 21px;
   text-align: left;
   min-height: 200px;
+  line-height: 1.6;
+  user-select: none;
 }
 
+.word{
+  display: inline-block;
+  padding: 2px 3px;
+  border-radius: 6px;
+  margin: 0 1px;
+}
+
+.word.current{
+  background: rgba(255, 211, 105, 0.08);
+  outline: 1px solid rgba(255, 211, 105, 0.25);
+}
+
+.word.correct{
+  color: #29bb89;
+}
+
+.word.wrong{
+  color: #e84545;
+  text-decoration: none;
+  border-bottom: 2px solid #e84545;
+}
+
+.word.over{
+  border-bottom: 2px solid #e84545;
+}
+
+.char{
+  display: inline-block;
+  padding: 0 0.5px;
+  border-radius: 3px;
+}
+
+.char.correct{
+  color: #29bb89;
+}
+
+.char.wrong{
+  color: #e84545;
+  text-decoration: underline;
+}
+
+.space{
+  white-space: pre;
+}
+
+/* --- Input --- */
 input:focus, textarea:focus, select:focus, a:focus{
   outline: 0 ;
 }
@@ -140,27 +180,17 @@ a:focus,a:hover{
   text-decoration: none;
 }
 
-footer{
-  padding: 20px;
-  font-size: 15px;
-}
-
-.restart-button{
-  padding: 10px;
-}
-
 textarea{
   font-family: 'Source Code Pro', monospace;
   background: #212121;
-  border: solid, #52575d;
-  border-width: 2px;
+  border: 2px solid #52575d;
   border-radius: 10px;
   color: #eeeeee;
   padding: 10px;
   font-size: 1.2rem;
   resize: none;
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .btn-yellow{
@@ -172,4 +202,44 @@ textarea{
 .btn-yellow:hover{
   background-color: #ffd369;
   border-color: #ffd369;
+  color: #212121;
+}
+
+/* --- Stats page helpers --- */
+.dark-select{
+  background: #212121;
+  border-color: #52575d;
+  color: #eeeeee;
+}
+
+.dark-select:focus{
+  border-color: #ffd369;
+  box-shadow: 0 0 0 0.25rem rgba(255, 211, 105, 0.15);
+}
+
+.summary-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media(max-width: 900px){
+  .summary-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.summary-item{
+  border: 1px solid #52575d;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #212121;
+}
+
+.summary-item .label{
+  color: #bbbbbb;
+  font-size: 0.9rem;
+}
+
+.summary-item .value{
+  color: #eeeeee;
+  font-size: 1.5rem;
 }

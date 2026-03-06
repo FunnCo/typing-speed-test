@@ -3,24 +3,64 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Статистика — Typing Test</title>
+    <title>Статистика — FunTypeTest</title>
 
     <link rel="icon" href="favicon.ico">
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <!-- Ваши стили -->
     <link rel="stylesheet" href="styles.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <div class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h1 class="yellow h3 m-0">Статистика тренировок</h1>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
           <a href="index.html" class="btn btn-sm btn-outline-warning">Назад к тесту</a>
           <a href="glossary.html" class="btn btn-sm btn-outline-warning">Справка</a>
           <button id="clearStatsBtn" class="btn btn-sm btn-outline-danger">Очистить статистику</button>
+        </div>
+      </div>
+
+      <!-- Фильтры -->
+      <div class="card mb-3" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-4">
+              <label class="form-label text-light">Сложность</label>
+              <select id="filterDifficulty" class="form-select form-select-sm dark-select">
+                <option value="all" selected>Все</option>
+                <option value="beginner">beginner (база)</option>
+                <option value="pro">pro (про)</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label text-light">Лимит времени</label>
+              <select id="filterDuration" class="form-select form-select-sm dark-select">
+                <option value="all" selected>Все</option>
+                <option value="30">30 сек</option>
+                <option value="60">60 сек</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4 d-flex gap-2 align-items-center">
+              <div class="form-check mt-3 mt-md-0">
+                <input class="form-check-input" type="checkbox" id="toggleMA" checked>
+                <label class="form-check-label text-light" for="toggleMA">Сглаживание (MA)</label>
+              </div>
+              <button id="resetFiltersBtn" class="btn btn-sm btn-outline-warning ms-auto">Сбросить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Агрегаты -->
+      <div class="card mb-4" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <h5 class="card-title yellow">Сводка</h5>
+          <div id="summary" class="summary-grid">
+            <!-- заполняется скриптом -->
+          </div>
         </div>
       </div>
 
@@ -28,7 +68,9 @@
         <div class="card-body">
           <h5 class="card-title yellow">График динамики</h5>
           <canvas id="statsChart" height="120"></canvas>
-          <small class="text-muted d-block mt-2">Показаны WPM и точность (%) по мере выполнения попыток.</small>
+          <small class="text-muted d-block mt-2">
+            Показаны WPM (std), точность по словам и точность по символам по мере выполнения попыток (с учётом фильтров).
+          </small>
         </div>
       </div>
 
@@ -36,15 +78,19 @@
         <div class="card-body">
           <h5 class="card-title yellow">Список попыток</h5>
           <div id="attemptsList" class="list-group">
-            <!-- Список будет заполнен скриптом -->
+            <!-- заполняется скриптом -->
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Скрипт страницы статистики -->
+    <!-- Shared modules -->
+    <script src="storage.js"></script>
+    <script src="metrics.js"></script>
+
+    <!-- Page script -->
     <script src="stats.js"></script>
-    <!-- Bootstrap bundle -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
