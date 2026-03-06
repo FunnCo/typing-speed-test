@@ -27,17 +27,18 @@
         <div class="d-flex align-items-center gap-3">
           <a href="stats.html" class="btn btn-sm btn-outline-warning">Статистика</a>
           <a href="glossary.html" class="btn btn-sm btn-outline-warning">Справка</a>
+          <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#helpModal">Инструкция</button>
         </div>
       </div>
 
       <div class="limits-box">
         <div class="limit">
-          <a id="thirty" class="yellow" href="#">30s</a>
-          <a id="sixty" href="#">60s</a>
+          <button id="thirty" class="btn btn-link p-0 yellow" type="button" aria-pressed="true" aria-label="Лимит времени 30 секунд">30s</button>
+          <button id="sixty" class="btn btn-link p-0" type="button" aria-label="Лимит времени 60 секунд">60s</button>
         </div>
         <div class="limit">
-          <a id="beg" class="yellow" href="#">beginner</a>
-          <a id="pro" href="#">pro</a>
+          <button id="beg" class="btn btn-link p-0 yellow" type="button" aria-pressed="true" aria-label="Режим beginner">beginner</button>
+          <button id="pro" class="btn btn-link p-0" type="button" aria-label="Режим pro">pro</button>
         </div>
       </div>
 
@@ -60,12 +61,29 @@
       </div>
 
       <div class="restart-button center">
-        <a id="restartBtn" class="current" href="#">
-          <i class="fas fa-redo"></i>
-        </a>
+        <button id="restartBtn" class="current btn btn-link" type="button" aria-label="Перезапустить тест">
+          <i class="fas fa-redo" aria-hidden="true"></i>
+        </button>
       </div>
+    </div>
 
-      <footer class="center">©2021 <a class="grey" href="https://shreyagarwal13.github.io/shrey_personal_website/">Shrey Agarwal</a></footer>
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content" style="background:#2a2a2a; border-color:#52575d;">
+          <div class="modal-header">
+            <h5 class="modal-title yellow" id="helpModalLabel">Инструкция</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body">
+            <p>Таймер запускается при первом вводе символа. Нажатие на пробел или Enter отправляет слово на проверку. После окончания времени ввод блокируется, показываются PA и WPM, попытка сохраняется в статистику.</p>
+            <ul>
+              <li>Выберите лимит времени (30s/60s) и уровень (beginner/pro).</li>
+              <li>Старайтесь сохранять точность — она влияет на итоговый результат.</li>
+              <li>Смотрите прогресс на странице «Статистика».</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Bootstrap 5 bundle (includes Popper) -->

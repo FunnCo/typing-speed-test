@@ -22,6 +22,13 @@ var difficulty=1;
 displayTest(difficulty);
 
 //on Input
+inputItem.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault(); // чтобы не добавлялся перевод строки
+    checkWord();
+  }
+});
+
 inputItem.addEventListener('input', function(event){
   if(flag===0){
     flag=1;
@@ -102,15 +109,6 @@ function timeStart(){
   }, 1000);
 }
 
-//diable textarea and wait for restart
-function timeOver(){
-  inputItem.disabled = true;
-  restartBtn.focus();
-
-  displayScore();
-  saveAttempt();
-}
-
 //set Limit visibility
 function limitVisible(){
   thirty.style.visibility = 'visible';
@@ -166,8 +164,8 @@ function checkWord(){
   const checkSpan = document.getElementById(wordID);
   wordNo++;
   wordsSubmitted++;
-
-  if(checkSpan.innerText === wordEntered){
+  console.log(wordEntered.trim() + " vs " + checkSpan.innerText.trim());
+  if(checkSpan.innerText.trim() === wordEntered.trim()){
     colorSpan(wordID, 1);
     wordsCorrect++;
     cw.innerText=wordsCorrect;
@@ -279,22 +277,18 @@ function currentDifficultyLabel() {
   return difficulty === 1 ? 'beginner' : 'pro';
 }
 
-// В timeOver() добавьте вызов saveAttempt() после displayScore():
-// Пример: (найдите функцию timeOver и модифицируйте)
+
 function timeOver(){
   inputItem.disabled = true;
   restartBtn.focus();
 
-  // Сначала показываем счёт
   displayScore();
-
-  // Затем сохраняем попытку
   const percentageAcc = (wordsSubmitted !== 0) ? Math.floor((wordsCorrect / wordsSubmitted) * 100) : 0;
   const attempt = {
     date: new Date().toISOString(),
-    durationSec: timer, // выбранный лимит времени (30 или 60)
+    durationSec: timer,
     difficulty: currentDifficultyLabel(),
-    wpm: factor * wordsCorrect, // как у вас рассчитывается в displayScore
+    wpm: factor * wordsCorrect, 
     accuracyPercent: percentageAcc,
     wordsCorrect,
     wordsSubmitted
