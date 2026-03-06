@@ -16,7 +16,6 @@ b, p{
   color: rgba(245, 245, 245, 1)
 }
 
-
 li{
   color: rgba(245, 245, 245, 0.9)
 }
@@ -48,15 +47,54 @@ li{
 
 #heading{
   align-self: left;
-  margin-top: 50px;
   font-size: 1.75rem;
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
 }
+
+/* --- Селекторы времени и режима --- */
 .limits-box{
   text-align: right;
-  margin: 0 35px 0 0 ;
   font-size: 15px;
+}
+
+.limit{
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: 8px;
+  margin-top: 8px;
+}
+
+.mode-btn{
+  appearance: none;
+  background: transparent;
+  border: 1px solid #52575d;
+  color: #eeeeee;
+  padding: 4px 12px;
+  border-radius: 999px; /* пилюля */
+  font-size: 0.9rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  text-decoration: none; /* без подчёркивания */
+}
+
+.mode-btn:hover{
+  border-color: #ffd369;
+  color: #ffd369;
+}
+
+.mode-btn:focus{
+  outline: 2px solid #ffd36933;
+  outline-offset: 2px;
+}
+
+.mode-btn.active{
+  background: #ffd369;
+  border-color: #ffd369;
+  color: #212121;
+  font-weight: 600;
 }
 
 .stats{
