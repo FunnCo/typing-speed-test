@@ -120,7 +120,7 @@ li{
 .text-display{
   margin: 14px 0 18px 0;
   font-size: 21px;
-  text-align: left;
+  text-align: justify;
   min-height: 200px;
   line-height: 1.6;
   user-select: none;
