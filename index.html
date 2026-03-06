@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This Speed Typing Test will give you an acuurate speed test and help increase your typing speed"/>
+
+    <title>Typing Test</title>
+
+    <link rel="icon" href="favicon.ico">
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Source+Code+Pro:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container-fluid box ">
+      <div class="top d-flex justify-content-between align-items-center">
+        <h1 id="heading" class="yellow">Typing Speed Test</h1>
+        <div class="d-flex align-items-center gap-3">
+          <a href="stats.html" class="btn btn-sm btn-outline-warning">Статистика</a>
+          <a href="glossary.html" class="btn btn-sm btn-outline-warning">Справка</a>
+        </div>
+      </div>
+
+      <div class="limits-box">
+        <div class="limit">
+          <a id="thirty" class="yellow" href="#">30s</a>
+          <a id="sixty" href="#">60s</a>
+        </div>
+        <div class="limit">
+          <a id="beg" class="yellow" href="#">beginner</a>
+          <a id="pro" href="#">pro</a>
+        </div>
+      </div>
+
+      <div class="stats center">
+        <div class="stat-block if">
+          <div id="timeName" class="stat-name yellow if">Time</div>
+          <div id="time" class="details if">30</div>
+        </div>
+
+        <div class="stat-block if">
+          <div id="cwName" class="stat-name yellow if">CW</div>
+          <div id="cw" class="details if">0</div>
+        </div>
+      </div>
+
+      <div class="text-display" id="textDisplay"></div>
+
+      <div class="input-area center">
+        <textarea rows="1" class="text-input" id="textInput" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      </div>
+
+      <div class="restart-button center">
+        <a id="restartBtn" class="current" href="#">
+          <i class="fas fa-redo"></i>
+        </a>
+      </div>
+
+      <footer class="center">©2021 <a class="grey" href="https://shreyagarwal13.github.io/shrey_personal_website/">Shrey Agarwal</a></footer>
+    </div>
+
+    <!-- Bootstrap 5 bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- My Javascript -->
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+<!-- glossary.html -->
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Справка и термины — Typing Test</title>
+    <meta name="description" content="Пояснение терминов WPM, точности и правил теста печати, советы по набору.">
+    <link rel="icon" href="favicon.ico">
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <!-- Ваши стили -->
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="container py-4 box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="yellow h3 m-0">Справка и термины</h1>
+        <div class="d-flex gap-2">
+          <a href="index.html" class="btn btn-sm btn-outline-warning">К тесту</a>
+          <a href="stats.html" class="btn btn-sm btn-outline-warning">Статистика</a>
+        </div>
+      </div>
+
+      <div class="card mb-4" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <h5 class="card-title yellow">Термины</h5>
+          <ul>
+            <li><b>WPM (Words Per Minute)</b> — количество слов в минуту. В данном проекте WPM считается как <b>factor × CW</b>, где factor = 2 при лимите 30s и = 1 при 60s, а <b>CW</b> — число верно набранных слов.</li>
+            <li><b>CW</b> — число верно набранных слов за попытку.</li>
+            <li><b>WS</b> — число отправленных слов (всех введённых пользователем).</li>
+            <li><b>PA (Accuracy, точность)</b> — процент верно набранных слов: <code>floor((CW / WS) × 100)</code>.</li>
+            <li><b>Режимы</b>:
+              <ul>
+                <li><b>beginner</b> — слова из массива basicWords (более простые).</li>
+                <li><b>pro</b> — слова из массива topWords (более сложные, частотные).</li>
+              </ul>
+            </li>
+            <li><b>Лимит времени</b> — 30s или 60s. При 30s включается пересчет WPM через множитель 2, при 60s множитель 1.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card mb-4" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <h5 class="card-title yellow">Правила работы теста</h5>
+          <ul>
+            <li>Таймер стартует при первом вводе символа.</li>
+            <li>Пробел (и другие пробельные символы) отправляет текущее слово на проверку.</li>
+            <li>Зелёный цвет — слово набрано верно, красный с подчёркиванием — ошибка, белый — текущее слово.</li>
+            <li>После окончания времени ввод блокируется, показываются PA и WPM, попытка сохраняется в <code>localStorage</code> и доступна на странице «Статистика».</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card mb-4" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <h5 class="card-title yellow">Советы по набору</h5>
+          <ul>
+            <li>Смотрите на экран, а не на клавиатуру.</li>
+            <li>Не спешите: высокая точность даёт лучший итоговый результат.</li>
+            <li>Тренируйтесь регулярно и сравнивайте прогресс на странице статистики.</li>
+            <li>Начните с режима beginner и 60s, затем переходите на 30s и pro.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="background:#2a2a2a; border-color:#52575d;">
+        <div class="card-body">
+          <h5 class="card-title yellow">О проекте</h5>
+          <p>Цель — тренировка скорости и точности печати. Сайт реализован на HTML5, CSS3, JavaScript. Для адаптивной верстки используется Bootstrap 5, для визуализации статистики — Chart.js. Интерфейс и логика работы обеспечивают интерактивность (DOM, обработчики событий, таймер, подсветка текущего слова, сохранение данных в <code>localStorage</code>).</p>
+        
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
