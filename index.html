@@ -22,9 +22,9 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
   </head>
   <body>
-    <div class="container-fluid box ">
-      <div class="top d-flex justify-content-between align-items-center">
-        <h1 id="heading" class="yellow">FunTypeTest</h1>
+<div class="container py-4 box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="yellow h3 m-0">FunTypeTest</h1>
         <div class="d-flex align-items-center gap-3">
           <a href="stats.html" class="btn btn-sm btn-outline-warning">Статистика</a>
           <a href="glossary.html" class="btn btn-sm btn-outline-warning">Справка</a>
@@ -34,12 +34,12 @@
 
       <div class="limits-box">
         <div class="limit" role="group" aria-label="Лимит времени">
-          <button id="thirty" class="mode-btn active" type="button" aria-pressed="true" aria-label="Лимит времени 30 секунд">30s</button>
-          <button id="sixty" class="mode-btn" type="button" aria-pressed="false" aria-label="Лимит времени 60 секунд">60s</button>
+          <button id="thirty" class="mode-btn active" type="button" aria-pressed="true" aria-label="Лимит времени 30 секунд">30 сек</button>
+          <button id="sixty" class="mode-btn" type="button" aria-pressed="false" aria-label="Лимит времени 60 секунд">60 сек</button>
         </div>
         <div class="limit" role="group" aria-label="Уровень сложности">
-          <button id="beg" class="mode-btn active" type="button" aria-pressed="true" aria-label="Режим beginner">beginner</button>
-          <button id="pro" class="mode-btn" type="button" aria-pressed="false" aria-label="Режим pro">pro</button>
+          <button id="beg" class="mode-btn active" type="button" aria-pressed="true" aria-label="Режим beginner">база</button>
+          <button id="pro" class="mode-btn" type="button" aria-pressed="false" aria-label="Режим pro">про</button>
         </div>
       </div>
 
@@ -78,7 +78,7 @@
           <div class="modal-body">
             <p>Таймер запускается при первом вводе символа. Нажатие на пробел или Enter отправляет слово на проверку. После окончания времени ввод блокируется, показываются PA и WPM, попытка сохраняется в статистику.</p>
             <ul>
-              <li>Выберите лимит времени (30s/60s) и уровень (beginner/pro).</li>
+              <li>Выберите лимит времени (30 сек/60 сек) и уровень (база/про).</li>
               <li>Старайтесь сохранять точность — она влияет на итоговый результат.</li>
               <li>Смотрите прогресс на странице «Статистика».</li>
             </ul>
