@@ -162,3 +162,14 @@ textarea{
   text-align: center;
   margin-bottom: 15px;
 }
+
+.btn-yellow{
+  color: #ffd369;
+  border-color: #ffd369;
+  background-color: transparent;
+}
+
+.btn-yellow:hover{
+  background-color: #ffd369;
+  border-color: #ffd369;
+}
