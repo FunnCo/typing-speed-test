@@ -1,45 +1,27 @@
-(function () {
-  'use strict';
+// storage.js (ES module)
+export const KEY = 'typingStats_v2';
 
-  const KEY = 'typingStats_v2';
+function safeJsonParse(raw) {
+  try { return JSON.parse(raw); } catch { return null; }
+}
 
-  function safeJsonParse(raw) {
-    try { return JSON.parse(raw); } catch { return null; }
-  }
+export function getStats() {
+  const raw = localStorage.getItem(KEY);
+  const parsed = raw ? safeJsonParse(raw) : null;
+  return Array.isArray(parsed) ? parsed : [];
+}
 
-  // Пробуем читать новые данные, иначе — старые (для совместимости)
-  function getStats() {
-    // v2
-    const raw2 = localStorage.getItem(KEY);
-    const parsed2 = raw2 ? safeJsonParse(raw2) : null;
-    if (Array.isArray(parsed2)) return parsed2;
+export function saveAttempt(attempt) {
+  const stats = getStats();
+  stats.push(attempt);
+  localStorage.setItem(KEY, JSON.stringify(stats));
+}
 
-    // v1 legacy (ваш старый ключ)
-    const raw1 = localStorage.getItem('typingStats');
-    const parsed1 = raw1 ? safeJsonParse(raw1) : null;
-    if (Array.isArray(parsed1)) return parsed1;
+export function clearStats() {
+  localStorage.removeItem(KEY);
+}
 
-    return [];
-  }
+export const TypingStorage = { KEY, getStats, saveAttempt, clearStats };
 
-  function saveAttempt(attempt) {
-    const stats = getStats();
-    stats.push(attempt);
-    try {
-      localStorage.setItem(KEY, JSON.stringify(stats));
-    } catch (e) {
-      console.error('Ошибка записи статистики:', e);
-    }
-  }
-
-  function clearStats() {
-    localStorage.clear();
-  }
-
-  window.TypingStorage = {
-    KEY,
-    getStats,
-    saveAttempt,
-    clearStats
-  };
-})();
+// (опционально) совместимость, если где-то ещё обращаешься как к window.TypingStorage
+if (typeof window !== 'undefined') window.TypingStorage = TypingStorage;
