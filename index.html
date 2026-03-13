@@ -82,7 +82,7 @@
 
       </div>
 
-      <div class="text-display" id="textDisplay" aria-label="Текст для набора"></div>
+      <div class="text-display" id="textDisplay" role="region" aria-label="Текст для набора"></div>
 
       <div class="input-area center">
         <textarea
@@ -109,11 +109,11 @@
     </div>
 
     <!-- Инструкция -->
-    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal fade" id="helpModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content dark-card">
           <div class="modal-header">
-            <h5 class="modal-title yellow" id="helpModalLabel">Инструкция</h5>
+            <h2 class="modal-title h5 yellow" id="helpModalLabel">Инструкция</h2>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
           </div>
           <div class="modal-body">
@@ -130,7 +130,7 @@
     </div>
 
     <!-- Модальное окно результатов -->
-<div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true">
+<div class="modal fade" id="resultsModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content dark-card">
       <div class="modal-header">
