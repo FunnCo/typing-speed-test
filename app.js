@@ -27,6 +27,9 @@
     wpmWords: document.getElementById('wpmWords'),
     accChars: document.getElementById('accChars'),
 
+    langRu: document.getElementById('langRu'),
+    langEn: document.getElementById('langEn'),
+
     // Results modal
     resultsModal: document.getElementById('resultsModal'),
     modalRestartBtn: document.getElementById('modalRestartBtn'),
@@ -64,8 +67,9 @@
     if (!m) return;
 
     // Заполнить поля
-    const diffLabel = attempt.difficulty === 'про' ? 'про' : 'база';
-    el.resultsMeta.textContent = `Режим: ${diffLabel} • Лимит: ${attempt.durationSec}s • ${new Date(attempt.date).toLocaleString()}`;
+    const diffLabel = attempt.difficulty === 'pro' ? 'про' : 'база';
+    const langLabel = attempt.language === 'en' ? 'EN' : 'RU';
+    el.resultsMeta.textContent = `Язык: ${langLabel} • Режим: ${diffLabel} • Лимит: ${attempt.durationSec}s • ${new Date(attempt.date).toLocaleString()}`;
 
     el.resWpmStd.textContent = String(attempt.wpmStd);
     el.resWpmWords.textContent = String(attempt.wpmWords);
@@ -90,7 +94,8 @@
   // --- App State ---
   const state = {
     durationSec: 30,
-    difficulty: 'база', // 'база' | 'про'
+    language: 'ru',        // 'ru' | 'en'
+    difficulty: 'beginner', // 'beginner' | 'pro'
 
     running: false,
     startedAt: null,
@@ -194,6 +199,8 @@
     el.sixty.style.visibility = v;
     el.beg.style.visibility = v;
     el.pro.style.visibility = v;
+    el.langRu.style.visibility = v;
+    el.langEn.style.visibility = v; 
   }
 
   function startIfNeeded() {
@@ -302,7 +309,7 @@
     state.index++;
 
     if (state.index >= state.words.length) {
-      state.words = WordGenerator.randomWords({ difficulty: state.difficulty, count: 40 });
+      state.words = WordGenerator.randomWords({ language: state.language, difficulty: state.difficulty, count: 40 });
       state.index = 0;
       renderWords(state.words);
     } else {
@@ -346,6 +353,7 @@
       wordsSubmitted: state.wordsSubmitted,
 
       charsTyped: state.charsTyped,
+      language: state.language,
       correctCharPositions: state.correctCharPositions,
       totalCharPositions: state.totalCharPositions
     };
@@ -367,7 +375,7 @@
     state.totalCharPositions = 0;
 
     state.index = 0;
-    state.words = WordGenerator.randomWords({ difficulty: state.difficulty, count: 40 });
+    state.words = WordGenerator.randomWords({ language: state.language, difficulty: state.difficulty, count: 40 });
 
     el.input.disabled = false;
     el.input.value = '';
@@ -431,17 +439,32 @@
 
   el.beg.addEventListener('click', () => {
     if (state.running) return;
-    state.difficulty = 'база';
+    state.difficulty = 'beginner';
     setActive(el.beg, el.pro);
     resetStateAndUI();
   });
 
   el.pro.addEventListener('click', () => {
     if (state.running) return;
-    state.difficulty = 'про';
+    state.difficulty = 'pro';
     setActive(el.pro, el.beg);
     resetStateAndUI();
   });
+
+  el.langRu?.addEventListener('click', () => {
+    if (state.running) return;
+    state.language = 'ru';
+    setActive(el.langRu, el.langEn);
+    resetStateAndUI();
+  });
+
+  el.langEn?.addEventListener('click', () => {
+    if (state.running) return;
+    state.language = 'en';
+    setActive(el.langEn, el.langRu);
+    resetStateAndUI();
+  });
+
 
   el.restart.addEventListener('click', () => {
     resetStateAndUI();

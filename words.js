@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const topWords = [
+  const ruTopWords = [
     "превосходительство","благоразумие","здравоохранение","достопримечательность","соответствующий",
     "предпринимательство","ответственность","непреодолимый","противоречивый","электрификация",
     "демилитаризация","неудовлетворительный","конституционность","взаимозаменяемость","инфраструктура",
@@ -41,7 +41,7 @@
     "многофакторный","артериосклероз","термоэлектрический","кровообращение","миротворчество"
   ];
 
-  const basicWords = [
+  const ruBasicWords = [
     "я","ты","он","она","мы","вы","они","да","нет","и","а","но","что","как","где","когда","почему","зачем","кто",
     "это","там","тут","всё","не","быть","есть","мой","твой","его","её","наш","ваш","их",
     "человек","дом","кот","собака","мяч","стол","стул","книга","ручка","окно","дверь","город","мир","улица",
@@ -80,16 +80,41 @@
     "страх","радость","горе","надежда","мечта","цель","план","правда","вера","любовь","дружба"
   ];
 
-  function getDictionary(difficultyLabel) {
-    return difficultyLabel === 'про' ? topWords : basicWords;
+  const enBasicWords = [
+    "the","and","to","of","a","in","is","you","that","it","he","was","for","on","are","as","with","his","they","i",
+    "at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said",
+    "there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these",
+    "so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way",
+    "could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come",
+    "made","may","part","over","new","sound","take","only","little","work","know","place","year","live","me","back","give","most","very"
+  ];
+
+  const enTopWords = [
+    "development","responsibility","international","communication","environment","relationship","opportunity","performance",
+    "organization","information","technology","education","experience","understanding","improvement","management",
+    "administration","significant","independent","collaboration","implementation","infrastructure","extraordinary",
+    "unpredictable","professional","consequence","consideration","compatibility","productivity","effectiveness",
+    "sustainability","configuration","authentication","authorization","confidentiality","accessibility","interoperability",
+    "characteristic","approximation","transformation","representation","visualization","synchronization","automation",
+    "experimentation","multifunctional","competitiveness","accountability","prioritization","personalization"
+  ];
+
+    function getDictionary({ language = 'ru', difficulty = 'beginner' } = {}) {
+    const lang = language === 'en' ? 'en' : 'ru';
+    const diff = difficulty === 'pro' ? 'pro' : 'beginner';
+
+    if (lang === 'en') {
+      return diff === 'pro' ? enTopWords : enBasicWords;
+    }
+    return diff === 'pro' ? ruTopWords : ruBasicWords;
   }
 
-  function randomWords({ difficulty = 'база', count = 40 } = {}) {
-    const dict = getDictionary(difficulty);
+  function randomWords({ language = 'ru', difficulty = 'beginner', count = 40 } = {}) {
+    const dict = getDictionary({ language, difficulty });
     const out = [];
     for (let i = 0; i < count; i++) {
       const idx = Math.floor(Math.random() * dict.length);
-      out.push(dict[idx]); // ВАЖНО: без пробелов
+      out.push(dict[idx]); // без пробелов
     }
     return out;
   }

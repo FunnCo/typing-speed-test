@@ -18,9 +18,19 @@
   }
 
   // Нормализуем попытку (поддерживаем старый формат)
+
+  function normalizeDifficulty(raw) {
+    if (raw === 'база') return 'beginner';
+    if (raw === 'про') return 'pro';
+    if (raw === 'beginner' || raw === 'pro') return raw;
+    return 'unknown'; 
+  }
+
   function normalizeAttempt(a) {
     const durationSec = toNumber(a.durationSec, 30);
-    const difficulty = a.difficulty || 'unknown';
+    const difficulty = normalizeDifficulty(a.difficulty);
+    const language = (a.language === 'en' || a.language === 'ru') ? a.language : 'ru'; // legacy -> ru
+
 
     // legacy: a.wpm и a.accuracyPercent
     const wpmStd = (a.wpmStd != null)
@@ -45,6 +55,7 @@
       date: a.date,
       durationSec,
       difficulty,
+      language,
 
       wpmStd,
       wpmWords,
@@ -56,11 +67,12 @@
     };
   }
 
-  function applyFilters(attempts, { difficulty, durationSec }) {
+  function applyFilters(attempts, { difficulty, durationSec, language }) {
     return attempts.filter(a => {
+      const okLang = (language === 'all') || (a.language === language);
       const okDiff = (difficulty === 'all') || (a.difficulty === difficulty);
       const okDur = (durationSec === 'all') || (String(a.durationSec) === String(durationSec));
-      return okDiff && okDur;
+      return okLang && okDiff && okDur;
     });
   }
 
@@ -85,7 +97,8 @@
     toggleMA: document.getElementById('toggleMA'),
     resetFiltersBtn: document.getElementById('resetFiltersBtn'),
 
-    summary: document.getElementById('summary')
+    summary: document.getElementById('summary'),
+    filterLanguage: document.getElementById('filterLanguage')
   };
 
   // --- render list ---
@@ -111,7 +124,8 @@
       left.innerHTML = `
         <div class="basic-text"><span class="yellow">#${idx + 1}</span> — ${formatDate(a.date)}</div>
         <div class="small basic-text">Режим: ${a.difficulty}, Лимит: ${a.durationSec}s</div>
-      `;
+        <div class="small basic-text">Язык: ${a.language.toUpperCase()}, Режим: ${a.difficulty}, Лимит: ${a.durationSec}s</div>
+        `;
 
       const right = document.createElement('div');
       right.innerHTML = `
@@ -252,18 +266,24 @@
   // --- init / interactions ---
   function getFilterState() {
     return {
+      language: el.filterLanguage?.value || 'all',
       difficulty: el.filterDifficulty?.value || 'all',
       durationSec: el.filterDuration?.value || 'all',
       showMA: !!el.toggleMA?.checked
     };
   }
 
+
   function rerenderAll() {
     const raw = TypingStorage.getStats();
     const normalized = raw.map(normalizeAttempt);
 
     const fs = getFilterState();
-    const filtered = applyFilters(normalized, { difficulty: fs.difficulty, durationSec: fs.durationSec });
+    const filtered = applyFilters(normalized, {
+      difficulty: fs.difficulty,
+      durationSec: fs.durationSec,
+      language: fs.language
+    });
 
     renderSummary(filtered);
     renderAttemptsList(filtered);
@@ -276,11 +296,13 @@
     el.filterDifficulty?.addEventListener('change', rerenderAll);
     el.filterDuration?.addEventListener('change', rerenderAll);
     el.toggleMA?.addEventListener('change', rerenderAll);
+    el.filterLanguage?.addEventListener('change', rerenderAll);
 
     el.resetFiltersBtn?.addEventListener('click', () => {
       if (el.filterDifficulty) el.filterDifficulty.value = 'all';
       if (el.filterDuration) el.filterDuration.value = 'all';
       if (el.toggleMA) el.toggleMA.checked = true;
+      if (el.filterLanguage) el.filterLanguage.value = 'all';
       rerenderAll();
     });
 
