@@ -19,6 +19,8 @@
         <div class="d-flex gap-2 flex-wrap">
           <a href="index.html" class="btn btn-sm btn-outline-warning btn-yellow">Назад к тесту</a>
           <a href="glossary.html" class="btn btn-sm btn-outline-warning btn-yellow">Справка</a>
+          <button id="exportBtn" class="btn btn-sm btn-outline-warning btn-yellow">Экспорт</button>
+          <button id="importBtn" class="btn btn-sm btn-outline-warning btn-yellow">Импорт</button>
           <button id="clearStatsBtn" class="btn btn-sm btn-outline-danger">Очистить статистику</button>
         </div>
       </div>
@@ -91,6 +93,26 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="dataModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content" style="background:#2a2a2a; border-color:#52575d;">
+          <div class="modal-header">
+            <h5 class="modal-title yellow" id="dataModalTitle">Данные</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body">
+            <textarea id="dataTextarea" class="form-control dark-select" rows="10" spellcheck="false"></textarea>
+            <div class="small text-muted mt-2 basic-text" id="dataHint"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-warning btn-yellow" id="copyBtn">Копировать</button>
+            <button type="button" class="btn btn-outline-warning btn-yellow" id="applyBtn">Применить импорт</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Shared modules -->
     <script src="storage.js"></script>

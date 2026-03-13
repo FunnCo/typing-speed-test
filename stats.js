@@ -98,7 +98,17 @@
     resetFiltersBtn: document.getElementById('resetFiltersBtn'),
 
     summary: document.getElementById('summary'),
-    filterLanguage: document.getElementById('filterLanguage')
+    filterLanguage: document.getElementById('filterLanguage'),
+
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    dataModal: document.getElementById('dataModal'),
+    dataModalTitle: document.getElementById('dataModalTitle'),
+    dataTextarea: document.getElementById('dataTextarea'),
+    dataHint: document.getElementById('dataHint'),
+    copyBtn: document.getElementById('copyBtn'),
+    applyBtn: document.getElementById('applyBtn'),
+
   };
 
   // --- render list ---
@@ -177,6 +187,80 @@
 
   // --- chart ---
   let chartInstance = null;
+  let dataModalInstance = null;
+
+  function getDataModal() {
+    if (!el.dataModal) return null;
+    if (!dataModalInstance) dataModalInstance = new bootstrap.Modal(el.dataModal);
+    return dataModalInstance;
+  }
+
+  function openExport() {
+    const stats = TypingStorage.getStats();
+    if (el.dataModalTitle) el.dataModalTitle.textContent = 'Экспорт статистики (JSON)';
+    if (el.dataTextarea) el.dataTextarea.value = JSON.stringify(stats, null, 2);
+    if (el.dataHint) el.dataHint.textContent = 'Скопируйте JSON и сохраните у себя.';
+
+    if (el.applyBtn) el.applyBtn.style.display = 'none';
+    if (el.copyBtn) el.copyBtn.style.display = '';
+
+    getDataModal()?.show();
+  }
+
+  function openImport() {
+    if (el.dataModalTitle) el.dataModalTitle.textContent = 'Импорт статистики (JSON)';
+    if (el.dataTextarea) el.dataTextarea.value = '';
+    if (el.dataHint) el.dataHint.textContent = 'Вставьте JSON массива попыток. После импорта страница обновит графики.';
+    if (el.applyBtn) el.applyBtn.style.display = '';
+    if (el.copyBtn) el.copyBtn.style.display = 'none';
+
+    getDataModal()?.show();
+  }
+
+  function safeParseJson(raw) {
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+
+  function applyImport() {
+    const raw = el.dataTextarea?.value ?? '';
+    const parsed = safeParseJson(raw);
+
+    if (!Array.isArray(parsed)) {
+      alert('Ошибка: ожидается JSON-массив попыток.');
+      return;
+    }
+
+    // минимальная “профессиональная” проверка структуры
+    const ok = parsed.every(x => x && typeof x === 'object' && 'date' in x);
+    if (!ok) {
+      if (!confirm('Формат данных выглядит необычно. Всё равно импортировать?')) return;
+    }
+
+    try {
+      localStorage.setItem(TypingStorage.KEY, JSON.stringify(parsed));
+    } catch (e) {
+      alert('Не удалось сохранить данные (возможно, превышен лимит localStorage).');
+      return;
+    }
+
+    getDataModal()?.hide();
+    rerenderAll();
+  }
+
+  async function copyExportToClipboard() {
+    const text = el.dataTextarea?.value ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Скопировано в буфер обмена.');
+    } catch {
+      // fallback
+      el.dataTextarea?.focus();
+      el.dataTextarea?.select();
+      document.execCommand('copy');
+      alert('Скопировано (fallback).');
+    }
+  }
+
 
   function renderChart(stats, { showMA }) {
     if (!el.chart) return;
@@ -312,6 +396,11 @@
         rerenderAll();
       }
     });
+
+    el.exportBtn?.addEventListener('click', openExport);
+    el.importBtn?.addEventListener('click', openImport);
+    el.applyBtn?.addEventListener('click', applyImport);
+    el.copyBtn?.addEventListener('click', copyExportToClipboard);
   }
 
   document.addEventListener('DOMContentLoaded', initStatsPage);

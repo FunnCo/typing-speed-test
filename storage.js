@@ -33,9 +33,7 @@
   }
 
   function clearStats() {
-    localStorage.removeItem(KEY);
-    // не трогаем legacy автоматически, но можно по желанию:
-    // localStorage.removeItem('typingStats');
+    localStorage.clear();
   }
 
   window.TypingStorage = {
