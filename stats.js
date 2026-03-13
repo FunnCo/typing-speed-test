@@ -29,7 +29,7 @@ function normalizeAttempt(a) {
   const difficulty = normalizeDifficulty(a?.difficulty);
   const language = (a?.language === 'en' || a?.language === 'ru') ? a.language : 'ru';
 
-  // legacy поля из старых попыток (на всякий случай, но storage legacy уже убрали)
+
   const wpmStd = (a?.wpmStd != null)
     ? toNumber(a.wpmStd, 0)
     : (a?.wpm != null ? toNumber(a.wpm, 0) : 0);
@@ -187,8 +187,8 @@ function renderSummary(stats) {
 
   blocks.forEach(b => {
     const div = el('div', { className: 'summary-item' });
-    div.appendChild(el('div', { className: 'label', text: b.label }));
-    div.appendChild(el('div', { className: 'value', text: b.value }));
+    div.appendChild(el('div', { className: 'label center', text: b.label }));
+    div.appendChild(el('div', { className: 'value center', text: b.value }));
     dom.summary.appendChild(div);
   });
 }
