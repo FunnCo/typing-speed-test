@@ -81,10 +81,10 @@
   ];
 
   function getDictionary(difficultyLabel) {
-    return difficultyLabel === 'pro' ? topWords : basicWords;
+    return difficultyLabel === 'про' ? topWords : basicWords;
   }
 
-  function randomWords({ difficulty = 'beginner', count = 40 } = {}) {
+  function randomWords({ difficulty = 'база', count = 40 } = {}) {
     const dict = getDictionary(difficulty);
     const out = [];
     for (let i = 0; i < count; i++) {

@@ -64,7 +64,7 @@
     if (!m) return;
 
     // Заполнить поля
-    const diffLabel = attempt.difficulty === 'pro' ? 'про' : 'база';
+    const diffLabel = attempt.difficulty === 'про' ? 'про' : 'база';
     el.resultsMeta.textContent = `Режим: ${diffLabel} • Лимит: ${attempt.durationSec}s • ${new Date(attempt.date).toLocaleString()}`;
 
     el.resWpmStd.textContent = String(attempt.wpmStd);
