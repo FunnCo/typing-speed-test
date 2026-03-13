@@ -194,14 +194,13 @@
   }
 
   function setLimitsEnabled(enabled) {
-    const v = enabled ? 'visible' : 'hidden';
-    el.thirty.style.visibility = v;
-    el.sixty.style.visibility = v;
-    el.beg.style.visibility = v;
-    el.pro.style.visibility = v;
-    el.langRu.style.visibility = v;
-    el.langEn.style.visibility = v; 
+    const buttons = [el.thirty, el.sixty, el.beg, el.pro, el.langRu, el.langEn].filter(Boolean);
+    buttons.forEach(b => {
+      b.disabled = !enabled;
+      b.setAttribute('aria-disabled', String(!enabled));
+    });
   }
+
 
   function startIfNeeded() {
     if (state.running) return;
@@ -278,7 +277,7 @@
     return String(s ?? '').trim();
   }
 
-  function submitCurrentWord({ allowEmpty = false } = {}) {
+  function submitCurrentWord({ allowEmpty = false , addTrailingSpace = true} = {}) {
     const typedRaw = el.input.value;
     const typed = normalizeTyped(typedRaw);
     if (!typed && !allowEmpty) {
@@ -300,7 +299,7 @@
     state.correctCharPositions += cmp.correct;
     state.totalCharPositions += cmp.total;
 
-    state.charsTyped += (typed.length + 1);
+    state.charsTyped += typed.length + (addTrailingSpace ? 1 : 0);
 
     current.classList.remove('current', 'over');
     current.classList.add(exact ? 'correct' : 'wrong');
@@ -324,7 +323,7 @@
 
     // если пользователь что-то набрал — отправим как последнее слово
     if (normalizeTyped(el.input.value).length > 0) {
-      submitCurrentWord({ allowEmpty: false });
+      submitCurrentWord({ allowEmpty: false, addTrailingSpace: false });
     }
 
     stopTimer();
