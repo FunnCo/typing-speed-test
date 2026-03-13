@@ -241,7 +241,6 @@ export class TypingTestApp {
   // ---- wiring helpers ----
 
   bindEvents() {
-    // input safety
     this.el.input.addEventListener('paste', (e) => e.preventDefault());
 
     this.el.input.addEventListener('keydown', (e) => {
@@ -258,13 +257,6 @@ export class TypingTestApp {
 
     this.el.input.addEventListener('input', () => {
       if (!this.timer.running && this.el.input.value.length > 0) this.startIfNeeded();
-
-      if (/\s/.test(this.el.input.value)) {
-        const [first = ''] = this.el.input.value.split(/\s+/);
-        this.el.input.value = first;
-        this.submitCurrentWord();
-        return;
-      }
 
       this.wordView.updateLiveHighlight({
         typed: this.el.input.value,
