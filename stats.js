@@ -1,4 +1,3 @@
-// stats.js (ES module)
 import { TypingStorage } from './storage.js';
 import { TypingMetrics } from './metrics.js';
 
@@ -160,7 +159,6 @@ function renderAttemptsList(stats) {
   });
 }
 
-// --- summary ---
 function renderSummary(stats) {
   dom.summary.textContent = '';
 
@@ -346,7 +344,7 @@ async function copyExportToClipboard() {
     await navigator.clipboard.writeText(text);
     alert('Скопировано в буфер обмена.');
   } catch {
-    // fallback (да, execCommand legacy, но это только запасной вариант)
+    // fallback
     dom.dataTextarea.focus();
     dom.dataTextarea.select();
     document.execCommand('copy');

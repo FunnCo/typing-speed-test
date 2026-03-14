@@ -1,4 +1,3 @@
-// storage.js (ES module)
 export const KEY = 'typingStats_v2';
 
 function safeJsonParse(raw) {
@@ -23,5 +22,4 @@ export function clearStats() {
 
 export const TypingStorage = { KEY, getStats, saveAttempt, clearStats };
 
-// (опционально) совместимость, если где-то ещё обращаешься как к window.TypingStorage
 if (typeof window !== 'undefined') window.TypingStorage = TypingStorage;
