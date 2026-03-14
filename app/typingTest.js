@@ -92,19 +92,10 @@ export class TypingTestApp {
 
   #updateStatsUIRunning() {
     const s = this.state;
-
-    this.el.timeName.textContent = 'Время';
     this.el.time.textContent = String(this.timer.running ? this.timer.remainingSec() : s.durationSec);
-
-    this.el.cwName.textContent = 'CW';
     this.el.cw.textContent = String(s.wordsCorrect);
-
-    this.el.wpmName.textContent = 'WPM (std)';
     this.el.wpm.textContent = String(TypingMetrics.standardWpm(s.charsTyped, s.durationSec));
-
-    this.el.accName.textContent = 'Точность (слов)';
     this.el.acc.textContent = `${TypingMetrics.percent(s.wordsCorrect, s.wordsSubmitted)}%`;
-
     this.el.wpmWords.textContent = String(TypingMetrics.wordWpm(s.wordsCorrect, s.durationSec));
     this.el.accChars.textContent = `${TypingMetrics.percent(s.correctCharPositions, s.totalCharPositions)}%`;
   }
@@ -121,7 +112,6 @@ export class TypingTestApp {
     this.el.wpmName.textContent = 'WPM (std)';
     this.el.wpm.textContent = String(a.wpmStd);
 
-    this.el.accName.textContent = 'Точн. (слов)';
     this.el.acc.textContent = `${a.wordAccuracyPercent}%`;
 
     this.el.wpmWords.textContent = String(a.wpmWords);
