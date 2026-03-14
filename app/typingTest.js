@@ -149,11 +149,11 @@ export class TypingTestApp {
     this.#setModesEnabled(false);
   }
 
-  submitCurrentWord({ allowEmpty = false, addTrailingSpace = true } = {}) {
+  submitCurrentWord() {
     const typedRaw = this.el.input.value;
     const typed = normalizeTyped(typedRaw);
 
-    if (!typed && !allowEmpty) {
+    if (!typed) {
       this.el.input.value = '';
       this.wordView.updateLiveHighlight({
         typed: this.el.input.value,
@@ -174,7 +174,7 @@ export class TypingTestApp {
     this.state.correctCharPositions += cmp.correct;
     this.state.totalCharPositions += cmp.total;
 
-    this.state.charsTyped += typed.length + (addTrailingSpace ? 1 : 0);
+    this.state.charsTyped += typed.length;
 
     this.wordView.markSubmitted({ index, exact });
 
@@ -190,9 +190,8 @@ export class TypingTestApp {
   end() {
     if (!this.timer.running) return;
 
-    // если пользователь что-то набрал — отправим как последнее слово (без пробела)
     if (normalizeTyped(this.el.input.value).length > 0) {
-      this.submitCurrentWord({ allowEmpty: false, addTrailingSpace: false });
+      this.submitCurrentWord();
     }
 
     this.timer.stop();
